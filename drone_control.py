@@ -52,20 +52,38 @@ class Drone:
         :param angle: градус поворота
         """
         height *= -1
+        angle = math.radians(angle)
         self.connection.mav.send(mavutil.mavlink.MAVLink_set_position_target_local_ned_message(
             10, self.connection.target_system, self.connection.target_component, mavutil.mavlink.MAV_FRAME_LOCAL_NED,
             int(0b100111111000), lat, lon, height, 0, 0, 0, 0, 0, 0, angle, 0))
 
-    def set_speed(self, lat=0.0, lon=0.0, height=0.0):
+    def go_to_global_position(self, lat=0.0, lon=0.0, height=0.0, angle=0.0):
+        """дрон направляется в указанные глобальные
+        :param lat: широта в градусах (положительное - север; отрицательное - юг)
+        :param lon: долгота в м (положительное - восток; отрицательное - запад)
+        :param height: высота в м (положительное - вверх, отрицательное - вниз)
+        :param angle: градус поворота
+        """
+        height *= -1
+        angle = math.radians(angle)
+        lat = int(lat * 10 ** 7)
+        lon = int(lon * 10 ** 7)
+        self.connection.mav.send(mavutil.mavlink.MAVLink_set_position_target_global_int_message(
+            10, self.connection.target_system, self.connection.target_component, mavutil.mavlink.MAV_FRAME_GLOBAL_INT,
+            int(0b100111111000), lat, lon, height, 0, 0, 0, 0, 0, 0, angle, 0))
+
+    def set_speed(self, lat=0.0, lon=0.0, height=0.0, angle=0.0):
         """дрон направляется в указанные координаты относительно места старта
         :param lat: вперёд/назад в м/с положительное - вперёд, север; отрицательное - назад, юг)
         :param lon: влево/вправо в м/с (положительное - направо, восток; отрицательное - налево, запад)
         :param height: высота в м/с (положительное - вверх, отрицательное - вниз)
+        :param angle: угловая скорость в градусах/секунду
         """
         height *= -1
+        angle = math.radians(angle)
         self.connection.mav.send(mavutil.mavlink.MAVLink_set_position_target_local_ned_message(
             10, self.connection.target_system, self.connection.target_component, mavutil.mavlink.MAV_FRAME_LOCAL_NED,
-            int(0b110111000111), 0, 0, 0, lat, lon, height, 0, 0, 0, 0, 0))
+            int(0b000111000111), 0, 0, 0, lat, lon, height, 0, 0, 0, 0, angle))
 
     def get_battery_status(self):
         """
@@ -85,7 +103,7 @@ class Drone:
             "temperature": (msg.temperature / 100) if msg.temperature != 32767 else "invalid",
             "consumed_charge": msg.current_consumed if msg.current_consumed != -1 else "invalid",
             "consumed_energy": (msg.energy_consumed / 100) if msg.energy_consumed != -1 else "invalid"
-            }
+        }
         return battery_status
 
     def get_geo(self):
