@@ -1,51 +1,53 @@
+import drone_control
 
-def press_w():
+
+def press_w(obj: drone_control.Drone, speed: int = 1):
+    obj.set_speed(lat=speed)
+
+
+def press_a(obj: drone_control.Drone, speed: int = 1):
+    obj.set_speed(lon=-speed)
+
+
+def press_s(obj: drone_control.Drone, speed: int = 1):
+    obj.set_speed(lat=-speed)
+
+
+def press_d(obj: drone_control.Drone, speed: int = 1):
+    obj.set_speed(lon=speed)
+
+
+def press_q(obj: drone_control.Drone, speed: int = 1):
     pass
 
 
-def press_a():
+def press_e(obj: drone_control.Drone, speed: int = 1):
     pass
 
 
-def press_s():
+def press_shift(obj: drone_control.Drone, speed: int = 1):
+    obj.set_speed(height=-speed)
+
+
+def press_enter(obj: drone_control.Drone, speed: int = 1):
     pass
 
 
-def press_d():
+def press_space(obj: drone_control.Drone, speed: int = 1):
+    obj.set_speed(height=speed)
+
+
+def press_up_arrow(obj: drone_control.Drone, speed: int = 1):
     pass
 
 
-def press_q():
+def press_down_arrow(obj: drone_control.Drone, speed: int = 1):
     pass
 
 
-def press_e():
+def press_left_arrow(obj: drone_control.Drone, speed: int = 1):
     pass
 
 
-def press_shift():
-    pass
-
-
-def press_enter():
-    pass
-
-
-def press_space():
-    pass
-
-
-def press_up_arrow():
-    pass
-
-
-def press_down_arrow():
-    pass
-
-
-def press_left_arrow():
-    pass
-
-
-def press_right_arrow():
+def press_right_arrow(obj: drone_control.Drone, speed: int = 1):
     pass
