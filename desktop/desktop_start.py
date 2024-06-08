@@ -23,6 +23,7 @@ class Window(ctk.CTk):
         y = int((self.monitor_height - self.windows_size[1]) / 2)
 
         self.geometry(f'{self.windows_size[0]}x{self.windows_size[1]}+{x}+{y}')
+        self.minsize(600, 300)
         self.title('Название')
         self.configure(fg_color="#F2F2F2")
 

@@ -58,50 +58,57 @@ class MainWindow(ctk.CTkFrame):
 
         self.map_widget = TkinterMapView(self, corner_radius=10)
         self.map_widget.grid(row=1, column=1, columnspan=2, rowspan=2, sticky=tk.NSEW, padx=0, pady=0)
+        # self.map_widget.set_address("Москва")
 
-        main_frame = ctk.CTkFrame(
+        self.main_frame = ctk.CTkFrame(
             master=self,
             height=30,
             fg_color="#dcdcdc",
             corner_radius=15
         )
-        main_frame.grid(row=2, column=1, columnspan=5, rowspan=2, sticky=tk.NSEW, padx=10, pady=(0, 5))
+        self.main_frame.grid(row=2, column=1, columnspan=5, rowspan=2, sticky=tk.NSEW, padx=10, pady=(0, 5))
 
-        main_frame.grid_columnconfigure(index=0, weight=0)
-        main_frame.grid_columnconfigure(index=1, weight=0)
-        main_frame.grid_columnconfigure(index=2, weight=1)
-        main_frame.grid_columnconfigure(index=3, weight=1)
-        main_frame.grid_columnconfigure(index=4, weight=1)
-        main_frame.grid_columnconfigure(index=5, weight=0)
+        self.main_frame.grid_columnconfigure(index=0, weight=0)
+        self.main_frame.grid_columnconfigure(index=1, weight=0)
+        self.main_frame.grid_columnconfigure(index=2, weight=1)
+        self.main_frame.grid_columnconfigure(index=3, weight=1)
+        self.main_frame.grid_columnconfigure(index=4, weight=1)
+        self.main_frame.grid_columnconfigure(index=5, weight=0)
 
         my_image = ctk.CTkImage(light_image=Image.open("../Image/free-icon-font-battery-three-quarters-9234404.png"),
                                           dark_image=Image.open("../Image/free-icon-font-battery-three-quarters-9234404.png"),
                                           size=(20, 20))
-        image_label = ctk.CTkLabel(master=main_frame, image=my_image, text="")
+        image_label = ctk.CTkLabel(
+            master=self.main_frame,
+            image=my_image,
+            text=""
+        )
         image_label.grid(column=0, row=0, padx=(10, 5))
+        image_label.bind("<Enter>", lambda event: self.create_menu())
+        image_label.bind("<Leave>", lambda event: self.delete_menu())
 
         self.battery_label = ctk.CTkLabel(
-            master=main_frame,
+            master=self.main_frame,
             text="95%"
         )
         self.battery_label.grid(column=1, row=0)
-        self.battery_label.after(5000, self.current_battery)
+        # self.battery_label.after(5000, self.current_battery)
 
         my_image = ctk.CTkImage(light_image=Image.open("../Image/free-icon-font-drone-alt-11739931.png"),
                                 dark_image=Image.open("../Image/free-icon-font-drone-alt-11739931.png"),
                                 size=(20, 20))
-        image_label = ctk.CTkLabel(master=main_frame, image=my_image, text="")
+        image_label = ctk.CTkLabel(master=self.main_frame, image=my_image, text="")
         image_label.grid(column=2, row=0, padx=(10, 5), sticky=tk.E)
 
         my_image = ctk.CTkImage(light_image=Image.open("../Image/free-icon-font-world-3916990.png"),
                                 dark_image=Image.open("../Image/free-icon-font-world-3916990.png"),
                                 size=(20, 20))
-        image_label = ctk.CTkLabel(master=main_frame, image=my_image, text="")
+        image_label = ctk.CTkLabel(master=self.main_frame, image=my_image, text="")
         image_label.grid(column=3, row=0, padx=(10, 5), sticky=tk.W)
 
 
         frame_slider = ctk.CTkFrame(
-            master=main_frame,
+            master=self.main_frame,
             fg_color="transparent",
         )
         frame_slider.grid(column=4, row=0, sticky=tk.NSEW)
@@ -128,14 +135,38 @@ class MainWindow(ctk.CTkFrame):
         my_image = ctk.CTkImage(light_image=Image.open("../Image/free-icon-font-info-3916699.png"),
                                 dark_image=Image.open("../Image/free-icon-font-info-3916699.png"),
                                 size=(20, 20))
-        image_label = ctk.CTkLabel(master=main_frame, image=my_image, text="")
+        image_label = ctk.CTkLabel(master=self.main_frame, image=my_image, text="")
         image_label.grid(column=5, row=0, padx=(0, 10), sticky=tk.W)
 
         self.base.bind('<KeyPress>', self.on_key_press)
 
+    def create_menu(self):
+        obj = self.drone_list[self.current_drone]
+        data = obj.get_battery_status()
+
+        self.frame_menu_battery = ctk.CTkFrame(
+            master=self,
+            corner_radius=0,
+            width=150, height=80,
+            fg_color="white",
+        )
+        self.frame_menu_battery.grid(column=1, row=1, columnspan=2, sticky=tk.SW, padx=(10, 0), pady=(0, 5))
+
+        self.inform = ctk.CTkLabel(
+            master=self.frame_menu_battery,
+            text=f"Напряжение: {data.get('voltage')}\n"
+                 f"Температура: {data.get('temperature')}\n"
+                 f"Потребленный заряд: {data.get('consumed_charge')}\n"
+                 f"Потребленная энергия: {data.get('consumed_energy')}\n"
+        )
+        self.inform.place(x=0, y=0)
+
+    def delete_menu(self):
+        self.frame_menu_battery.destroy()
+
     def current_battery(self):
         obj = self.drone_list[self.current_drone]
-        self.battery_label.configure(text=f"{obj.get_battery_status.get('charge')}%")
+        self.battery_label.configure(text=f"{obj.get_battery_status().get('charge')}%")
 
     def on_key_press(self, event):
         if event.keysym in ('W', 'w'):
