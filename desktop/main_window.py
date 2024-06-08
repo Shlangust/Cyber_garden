@@ -80,12 +80,12 @@ class MainWindow(ctk.CTkFrame):
         image_label = ctk.CTkLabel(master=main_frame, image=my_image, text="")
         image_label.grid(column=0, row=0, padx=(10, 5))
 
-        battery_label = ctk.CTkLabel(
+        self.battery_label = ctk.CTkLabel(
             master=main_frame,
             text="95%"
         )
-        battery_label.grid(column=1, row=0)
-        battery_label.after(5000, current_battery)
+        self.battery_label.grid(column=1, row=0)
+        self.battery_label.after(5000, self.current_battery)
 
         my_image = ctk.CTkImage(light_image=Image.open("../Image/free-icon-font-drone-alt-11739931.png"),
                                 dark_image=Image.open("../Image/free-icon-font-drone-alt-11739931.png"),
@@ -134,7 +134,8 @@ class MainWindow(ctk.CTkFrame):
         self.base.bind('<KeyPress>', self.on_key_press)
 
     def current_battery(self):
-        pass
+        obj = self.drone_list[self.current_drone]
+        self.battery_label.configure(text=f"{obj.get_battery_status.get('charge')}%")
 
     def on_key_press(self, event):
         if event.keysym in ('W', 'w'):
