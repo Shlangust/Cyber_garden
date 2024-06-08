@@ -17,9 +17,9 @@ class MainWindow(ctk.CTkFrame):
         self.drone_list = list()
         self.current_drone = 0
 
-        # self.obj = drone_control.Drone(host="localhost", port="5762")
-        # self.obj.enter_guided_mode()
-        # self.drone_list.append(self.obj)
+        self.obj = drone_control.Drone(host="localhost", port="5762")
+        self.obj.enter_guided_mode()
+        self.drone_list.append(self.obj)
 
         self.start()
 
@@ -92,7 +92,7 @@ class MainWindow(ctk.CTkFrame):
             text="95%"
         )
         self.battery_label.grid(column=1, row=0)
-        # self.battery_label.after(5000, self.current_battery)
+        self.battery_label.after(5000, self.current_battery)
 
         my_image = ctk.CTkImage(light_image=Image.open("../Image/free-icon-font-drone-alt-11739931.png"),
                                 dark_image=Image.open("../Image/free-icon-font-drone-alt-11739931.png"),
@@ -147,19 +147,21 @@ class MainWindow(ctk.CTkFrame):
         self.frame_menu_battery = ctk.CTkFrame(
             master=self,
             corner_radius=0,
-            width=150, height=80,
+            width=170, height=85,
             fg_color="white",
         )
         self.frame_menu_battery.grid(column=1, row=1, columnspan=2, sticky=tk.SW, padx=(10, 0), pady=(0, 5))
 
         self.inform = ctk.CTkLabel(
             master=self.frame_menu_battery,
+            compound="left",
+            justify="left",
             text=f"Напряжение: {data.get('voltage')}\n"
                  f"Температура: {data.get('temperature')}\n"
                  f"Потребленный заряд: {data.get('consumed_charge')}\n"
                  f"Потребленная энергия: {data.get('consumed_energy')}\n"
         )
-        self.inform.place(x=0, y=0)
+        self.inform.place(x=5, y=5)
 
     def delete_menu(self):
         self.frame_menu_battery.destroy()
