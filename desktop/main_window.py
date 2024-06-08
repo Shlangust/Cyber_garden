@@ -17,9 +17,9 @@ class MainWindow(ctk.CTkFrame):
         self.drone_list = list()
         self.current_drone = 0
 
-        # self.obj = drone_control.Drone(host="localhost", port="5762")
-        # self.obj.enter_guided_mode()
-        # self.drone_list.append(self.obj)
+        self.obj = drone_control.Drone(host="localhost", port="5762")
+        self.obj.enter_guided_mode()
+        self.drone_list.append(self.obj)
 
         self.start()
 
@@ -135,7 +135,8 @@ class MainWindow(ctk.CTkFrame):
 
     def current_battery(self):
         obj = self.drone_list[self.current_drone]
-        self.battery_label.configure(text=f"{obj.get_battery_status.get('charge')}%")
+        self.battery_label.configure(text=f"{obj.get_battery_status().get('charge')}%")
+        self.after(5000, self.current_battery)
 
     def on_key_press(self, event):
         if event.keysym in ('W', 'w'):
