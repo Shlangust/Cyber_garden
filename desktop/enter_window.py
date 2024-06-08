@@ -3,12 +3,23 @@ import tkinter as tk
 import customtkinter as ctk
 
 import ScrollView
+import KeyProcesses
+import drone_control
 
 
 class enterWindow(ctk.CTkFrame):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
 
+        self.drone_list = list[drone_control.Drone]
+        self.current_drone = 0
+        self.obj = drone_control.Drone(host="localhost", port="5762")
+        self.obj.enter_guided_mode()
+        self.drone_list.append(self.obj)
+
+        self.start()
+
+    def start(self):
         self.grid_rowconfigure(index=0, weight=1)
         self.grid_rowconfigure(index=1, weight=0)
         self.grid_rowconfigure(index=2, weight=0)
@@ -88,6 +99,36 @@ class enterWindow(ctk.CTkFrame):
             command=self.button_click
         )
         button.grid(row=4, column=1, columnspan=2, sticky=tk.S, pady=(0, 25))
+
+        self.bind('<KeyPress>', self.on_key_press)
+
+    def on_key_press(self, event):
+        if event.keysym in ('W', 'w'):
+            KeyProcesses.press_w(self.drone_list[self.current_drone])
+        elif event.keysym in ('A', 'a'):
+            KeyProcesses.press_a(self.drone_list[self.current_drone])
+        elif event.keysym in ('S', 's'):
+            KeyProcesses.press_s(self.drone_list[self.current_drone])
+        elif event.keysym in ('D', 'd'):
+            KeyProcesses.press_d(self.drone_list[self.current_drone])
+        elif event.keysym in ('Q', 'q'):
+            KeyProcesses.press_q(self.drone_list[self.current_drone])
+        elif event.keysym in ('E', 'e'):
+            KeyProcesses.press_e(self.drone_list[self.current_drone])
+        elif event.keysym == 'Return':
+            KeyProcesses.press_enter(self.drone_list[self.current_drone])
+        elif event.keysym == 'Shift_L' or event.keysym == 'Shift_R':
+            KeyProcesses.press_shift(self.drone_list[self.current_drone])
+        elif event.keysym == 'space':
+            KeyProcesses.press_space(self.drone_list[self.current_drone])
+        elif event.keysym == 'Up':
+            KeyProcesses.press_up_arrow(self.drone_list[self.current_drone])
+        elif event.keysym == 'Down':
+            KeyProcesses.press_down_arrow(self.drone_list[self.current_drone])
+        elif event.keysym == 'Left':
+            KeyProcesses.press_left_arrow(self.drone_list[self.current_drone])
+        elif event.keysym == 'Right':
+            KeyProcesses.press_right_arrow(self.drone_list[self.current_drone])
 
     def button_click(self):
         print("нажатие кнопки!")

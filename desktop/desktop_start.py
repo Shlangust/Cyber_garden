@@ -36,36 +36,6 @@ class Window(ctk.CTk):
         window = main_window.MainWindow(self, fg_color="transparent")
         window.grid(row=0, column=0, sticky=tk.NSEW)
 
-        self.bind('<KeyPress>', self.on_key_press)
-
-    def on_key_press(self, event):
-        if event.keysym in ('W', 'w'):
-            KeyProcesses.press_w()
-        elif event.keysym in ('A', 'a'):
-            KeyProcesses.press_a()
-        elif event.keysym in ('S', 's'):
-            KeyProcesses.press_s()
-        elif event.keysym in ('D', 'd'):
-            KeyProcesses.press_d()
-        elif event.keysym in ('Q', 'q'):
-            KeyProcesses.press_q()
-        elif event.keysym in ('E', 'e'):
-            KeyProcesses.press_e()
-        elif event.keysym == 'Return':
-            KeyProcesses.press_enter()
-        elif event.keysym == 'Shift_L' or event.keysym == 'Shift_R':
-            KeyProcesses.press_shift()
-        elif event.keysym == 'space':
-            KeyProcesses.press_space()
-        elif event.keysym == 'Up':
-            KeyProcesses.press_up_arrow()
-        elif event.keysym == 'Down':
-            KeyProcesses.press_down_arrow()
-        elif event.keysym == 'Left':
-            KeyProcesses.press_left_arrow()
-        elif event.keysym == 'Right':
-            KeyProcesses.press_right_arrow()
-
 
 if __name__ == "__main__":
     app = Window()
