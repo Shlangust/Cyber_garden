@@ -167,6 +167,7 @@ class MainWindow(ctk.CTkFrame):
     def current_battery(self):
         obj = self.drone_list[self.current_drone]
         self.battery_label.configure(text=f"{obj.get_battery_status().get('charge')}%")
+        self.after(5000, self.current_battery)
 
     def on_key_press(self, event):
         if event.keysym in ('W', 'w'):
