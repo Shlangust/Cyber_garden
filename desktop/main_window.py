@@ -8,11 +8,13 @@ import drone_control
 
 
 class MainWindow(ctk.CTkFrame):
-    def __init__(self, master, **kwargs):
+    def __init__(self, base, master, **kwargs):
         super().__init__(master, **kwargs)
 
-        self.drone_list = list[drone_control.Drone]
+        self.base = base
+        self.drone_list = list()
         self.current_drone = 0
+
         self.obj = drone_control.Drone(host="localhost", port="5762")
         self.obj.enter_guided_mode()
         self.drone_list.append(self.obj)
@@ -81,7 +83,7 @@ class MainWindow(ctk.CTkFrame):
         )
         text_information.grid(row=2, column=1, columnspan=3, pady=40)
 
-        self.bind('<KeyPress>', self.on_key_press)
+        self.base.bind('<KeyPress>', self.on_key_press)
 
     def on_key_press(self, event):
         if event.keysym in ('W', 'w'):

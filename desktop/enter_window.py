@@ -11,7 +11,6 @@ class enterWindow(ctk.CTkFrame):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
 
-
         self.start()
 
     def start(self):

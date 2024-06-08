@@ -2,18 +2,22 @@ import drone_control
 
 
 def press_w(obj: drone_control.Drone, speed: int = 1):
+    print("дрон летит вперед")
     obj.set_speed(lat=speed)
 
 
 def press_a(obj: drone_control.Drone, speed: int = 1):
+    print("рон летит нелево")
     obj.set_speed(lon=-speed)
 
 
 def press_s(obj: drone_control.Drone, speed: int = 1):
+    print("дрон летит назад")
     obj.set_speed(lat=-speed)
 
 
 def press_d(obj: drone_control.Drone, speed: int = 1):
+    print("дрон летит вправо")
     obj.set_speed(lon=speed)
 
 
