@@ -5,12 +5,17 @@ from drone_control import Drone
 
 
 if __name__ == "__main__":
-    drone1 = Drone('localhost', '5762')
+    connection = mavutil.mavlink_connection(f'tcp:localhost:5762')
+    connection.wait_heartbeat()
 
-    drone1.enter_guided_mode()
-    time.sleep(1)
-    drone1.arm_drone()
-    time.sleep(1)
-    drone1.take_off()
-    time.sleep(4)
-    drone1.go_to_local_position(20, 10, 10)
+    connection.mav.command_long_send(connection.target_system, connection.target_component,
+                                     mavutil.mavlink.MAV_CMD_DO_DIGICAM_CONFIGURE, 0, 1, 24, 4, 80, 0, 0, 0.1)
+
+    connection.mav.command_long_send(connection.target_system, connection.target_component,
+                                     mavutil.mavlink.MAV_CMD_DO_DIGICAM_CONTROL, 0, 1, 0, 0, 1, 1, 0, 0)
+
+    connection.mav.request_data_stream_send(connection.target_system, connection.target_component,
+                                            mavutil.mavlink.MAV_DATA_STREAM_ALL, 1, 1)
+
+    msg = connection.recv_match(blocking=True)
+    print(msg)
