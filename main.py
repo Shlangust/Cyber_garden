@@ -1,15 +1,16 @@
 from pymavlink import mavutil
-conection = mavutil.mavlink_connection('tcp:localhost:5762')
-conection.wait_heartbeat()
+import time
 
-print('Heartbeat from system (system %u component %u)' %
-      (conection.target_system, conection.target_component))
+from drone_control import Drone
 
-conection.mav.command_long_send(conection.target_system, conection.target_component,
-                                mavutil.mavlink.MAV_CMD_COMPONENT_ARM_DISARM, 0, 1, 0, 0, 0, 0, 0, 0)
-conection.mav.command_long_send(conection.target_system, conection.target_component,
-                                mavutil.mavlink.MAV_CMD_NAV_TAKEOFF, 0, 0, 0, 0, 0, 0, 0, 10)
 
-while True:
-    msg = conection.recv_match(type='COMMAND_ACK', blocking=True)
-    print(msg)
+if __name__ == "__main__":
+    drone1 = Drone('localhost', '5762')
+
+    drone1.enter_guided_mode()
+    time.sleep(1)
+    drone1.arm_drone()
+    time.sleep(1)
+    drone1.take_off()
+    time.sleep(4)
+    drone1.go_to_local_position(20, 10, 10)
