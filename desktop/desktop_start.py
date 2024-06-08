@@ -33,7 +33,7 @@ class Window(ctk.CTk):
         self.grid_columnconfigure(index=0, weight=1)
 
         # window = enter_window.enterWindow(self, fg_color="transparent")
-        window = main_window.MainWindow(self, self, fg_color="transparent")
+        window = main_window.MainWindow(self, self, fg_color="#F2F2F2")
         window.grid(row=0, column=0, sticky=tk.NSEW)
 
 

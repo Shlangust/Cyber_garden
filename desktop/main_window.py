@@ -1,6 +1,8 @@
 import tkinter as tk
 
 import customtkinter as ctk
+from tkintermapview import TkinterMapView
+from PIL import Image
 
 import ScrollView
 import KeyProcesses
@@ -15,9 +17,9 @@ class MainWindow(ctk.CTkFrame):
         self.drone_list = list()
         self.current_drone = 0
 
-        self.obj = drone_control.Drone(host="localhost", port="5762")
-        self.obj.enter_guided_mode()
-        self.drone_list.append(self.obj)
+        # self.obj = drone_control.Drone(host="localhost", port="5762")
+        # self.obj.enter_guided_mode()
+        # self.drone_list.append(self.obj)
 
         self.start()
 
@@ -54,36 +56,85 @@ class MainWindow(ctk.CTkFrame):
         )
         frame.grid(row=1, column=1, columnspan=2, rowspan=2, sticky=tk.NSEW, padx=0, pady=0)
 
-        camera = ctk.CTkFrame(
-            master=self,
-            fg_color="gray",
-        )
-        camera.grid(row=1, column=1, columnspan=2, sticky=tk.NSEW, padx=0, pady=0)
+        self.map_widget = TkinterMapView(self, corner_radius=10)
+        self.map_widget.grid(row=1, column=1, columnspan=2, rowspan=2, sticky=tk.NSEW, padx=0, pady=0)
 
-        label_left = ctk.CTkLabel(
+        main_frame = ctk.CTkFrame(
             master=self,
-            text="x: 0, y: 0 z: 0",
-            text_color="black",
-            bg_color="white"
+            height=30,
+            fg_color="#dcdcdc",
+            corner_radius=15
         )
-        label_left.grid(row=2, column=1, sticky=tk.NW, padx=(10, 0))
+        main_frame.grid(row=2, column=1, columnspan=5, rowspan=2, sticky=tk.NSEW, padx=10, pady=(0, 5))
 
-        label_right = ctk.CTkLabel(
-            master=self,
-            text="заряд батареи: 90%",
-            text_color="black",
-            bg_color="white"
-        )
-        label_right.grid(row=2, column=2, sticky=tk.NE, padx=(0, 10))
+        main_frame.grid_columnconfigure(index=0, weight=0)
+        main_frame.grid_columnconfigure(index=1, weight=0)
+        main_frame.grid_columnconfigure(index=2, weight=1)
+        main_frame.grid_columnconfigure(index=3, weight=1)
+        main_frame.grid_columnconfigure(index=4, weight=1)
+        main_frame.grid_columnconfigure(index=5, weight=0)
 
-        text_information = ctk.CTkLabel(
-            master=self,
-            bg_color="white",
-            text="W - вперед \tA - влево \nS - назад  \tD - вправо \nQ - поворот налево \tE - поворот направо \n↑ - тангаж  \t↓ - тангаж \n← - крен   \t→ - крен \nEnter - вверх \tShift - вниз"
+        my_image = ctk.CTkImage(light_image=Image.open("../Image/free-icon-font-battery-three-quarters-9234404.png"),
+                                          dark_image=Image.open("../Image/free-icon-font-battery-three-quarters-9234404.png"),
+                                          size=(20, 20))
+        image_label = ctk.CTkLabel(master=main_frame, image=my_image, text="")
+        image_label.grid(column=0, row=0, padx=(10, 5))
+
+        battery_label = ctk.CTkLabel(
+            master=main_frame,
+            text="95%"
         )
-        text_information.grid(row=2, column=1, columnspan=3, pady=40)
+        battery_label.grid(column=1, row=0)
+        battery_label.after(5000, current_battery)
+
+        my_image = ctk.CTkImage(light_image=Image.open("../Image/free-icon-font-drone-alt-11739931.png"),
+                                dark_image=Image.open("../Image/free-icon-font-drone-alt-11739931.png"),
+                                size=(20, 20))
+        image_label = ctk.CTkLabel(master=main_frame, image=my_image, text="")
+        image_label.grid(column=2, row=0, padx=(10, 5), sticky=tk.E)
+
+        my_image = ctk.CTkImage(light_image=Image.open("../Image/free-icon-font-world-3916990.png"),
+                                dark_image=Image.open("../Image/free-icon-font-world-3916990.png"),
+                                size=(20, 20))
+        image_label = ctk.CTkLabel(master=main_frame, image=my_image, text="")
+        image_label.grid(column=3, row=0, padx=(10, 5), sticky=tk.W)
+
+
+        frame_slider = ctk.CTkFrame(
+            master=main_frame,
+            fg_color="transparent",
+        )
+        frame_slider.grid(column=4, row=0, sticky=tk.NSEW)
+
+        text_1 = ctk.CTkLabel(
+            master=frame_slider,
+            text="скорость: 0.1 "
+        )
+        text_1.grid(column=0, row=0)
+
+        slider = ctk.CTkSlider(
+            master=frame_slider,
+            from_=10,
+            to=100,
+        )
+        slider.grid(column=1, row=0)
+
+        text_2 = ctk.CTkLabel(
+            master=frame_slider,
+            text=" 10 м/сек "
+        )
+        text_2.grid(column=2, row=0)
+
+        my_image = ctk.CTkImage(light_image=Image.open("../Image/free-icon-font-info-3916699.png"),
+                                dark_image=Image.open("../Image/free-icon-font-info-3916699.png"),
+                                size=(20, 20))
+        image_label = ctk.CTkLabel(master=main_frame, image=my_image, text="")
+        image_label.grid(column=5, row=0, padx=(0, 10), sticky=tk.W)
 
         self.base.bind('<KeyPress>', self.on_key_press)
+
+    def current_battery(self):
+        pass
 
     def on_key_press(self, event):
         if event.keysym in ('W', 'w'):
