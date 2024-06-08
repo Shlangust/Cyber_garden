@@ -89,7 +89,7 @@ class MainWindow(ctk.CTkFrame):
 
         self.battery_label = ctk.CTkLabel(
             master=self.main_frame,
-            text="95%"
+            text="100%"
         )
         self.battery_label.grid(column=1, row=0)
         self.battery_label.after(5000, self.current_battery)
@@ -123,6 +123,7 @@ class MainWindow(ctk.CTkFrame):
             master=frame_slider,
             from_=10,
             to=100,
+            command=self.slider_event
         )
         slider.grid(column=1, row=0)
 
@@ -139,6 +140,11 @@ class MainWindow(ctk.CTkFrame):
         image_label.grid(column=5, row=0, padx=(0, 10), sticky=tk.W)
 
         self.base.bind('<KeyPress>', self.on_key_press)
+
+    current_speed = 1
+
+    def slider_event(self, value):
+        self.current_speed = round(value / 10, 3)
 
     def create_menu(self):
         obj = self.drone_list[self.current_drone]
@@ -173,28 +179,28 @@ class MainWindow(ctk.CTkFrame):
 
     def on_key_press(self, event):
         if event.keysym in ('W', 'w'):
-            KeyProcesses.press_w(self.drone_list[self.current_drone])
+            KeyProcesses.press_w(self.drone_list[self.current_drone], self.current_speed)
         elif event.keysym in ('A', 'a'):
-            KeyProcesses.press_a(self.drone_list[self.current_drone])
+            KeyProcesses.press_a(self.drone_list[self.current_drone], self.current_speed)
         elif event.keysym in ('S', 's'):
-            KeyProcesses.press_s(self.drone_list[self.current_drone])
+            KeyProcesses.press_s(self.drone_list[self.current_drone], self.current_speed)
         elif event.keysym in ('D', 'd'):
-            KeyProcesses.press_d(self.drone_list[self.current_drone])
+            KeyProcesses.press_d(self.drone_list[self.current_drone], self.current_speed)
         elif event.keysym in ('Q', 'q'):
-            KeyProcesses.press_q(self.drone_list[self.current_drone])
+            KeyProcesses.press_q(self.drone_list[self.current_drone], self.current_speed)
         elif event.keysym in ('E', 'e'):
-            KeyProcesses.press_e(self.drone_list[self.current_drone])
+            KeyProcesses.press_e(self.drone_list[self.current_drone], self.current_speed)
         elif event.keysym == 'Return':
-            KeyProcesses.press_enter(self.drone_list[self.current_drone])
+            KeyProcesses.press_enter(self.drone_list[self.current_drone], self.current_speed)
         elif event.keysym == 'Shift_L' or event.keysym == 'Shift_R':
-            KeyProcesses.press_shift(self.drone_list[self.current_drone])
+            KeyProcesses.press_shift(self.drone_list[self.current_drone], self.current_speed)
         elif event.keysym == 'space':
-            KeyProcesses.press_space(self.drone_list[self.current_drone])
+            KeyProcesses.press_space(self.drone_list[self.current_drone], self.current_speed)
         elif event.keysym == 'Up':
-            KeyProcesses.press_up_arrow(self.drone_list[self.current_drone])
+            KeyProcesses.press_up_arrow(self.drone_list[self.current_drone], self.current_speed)
         elif event.keysym == 'Down':
-            KeyProcesses.press_down_arrow(self.drone_list[self.current_drone])
+            KeyProcesses.press_down_arrow(self.drone_list[self.current_drone], self.current_speed)
         elif event.keysym == 'Left':
-            KeyProcesses.press_left_arrow(self.drone_list[self.current_drone])
+            KeyProcesses.press_left_arrow(self.drone_list[self.current_drone], self.current_speed)
         elif event.keysym == 'Right':
-            KeyProcesses.press_right_arrow(self.drone_list[self.current_drone])
+            KeyProcesses.press_right_arrow(self.drone_list[self.current_drone], self.current_speed)
