@@ -21,7 +21,6 @@ class MainWindow(ctk.CTkFrame):
             if result == 4:
                 self.create_connect_drone()
         else:
-            self.obj.enter_guided_mode()
             self.drone_list.append(self.obj)
 
     def __init__(self, base, master, **kwargs):
@@ -178,12 +177,11 @@ class MainWindow(ctk.CTkFrame):
         image_label1.bind("<Enter>", lambda event: self.create_inform_menu())
         image_label1.bind("<Leave>", lambda event: self.delete_inform_menu())
 
-
         self.base.bind('<KeyPress>', self.on_key_press)
         self.base.bind('<Control-space>', self.on_ctrl_space)
 
     def on_ctrl_space(self, event):
-        if len(self.drone_list[self.current_drone] != 0):
+        if len(self.drone_list) != 0:
             drone = self.drone_list[self.current_drone]
             drone.auto_start()
 
@@ -235,7 +233,7 @@ class MainWindow(ctk.CTkFrame):
         marker = self.list_drone_positions[self.current_drone]
         marker.set_position(position.get("latitude"), position.get("longitude"))
 
-        self.after(500, self.update_dron_position())
+        self.after(500, self.update_dron_position)
 
     def new_view(self):
         image = ctk.CTkImage(
