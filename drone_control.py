@@ -52,33 +52,50 @@ class Drone:
             self.take_off(height)
             time.sleep(0.3)
 
-    def go_to_local_position(self, lat=0.0, lon=0.0, height=0.0, angle=0.0):
+    def auto_land(self):
+        while self.get_geo().get('altitude_ground') > 3:
+            self.set_speed(height=-1)
+            time.sleep(0.3)
+        while self.get_geo().get('altitude_ground') > 0.05:
+            self.set_speed(height=-0.15)
+            time.sleep(0.3)
+        self.disarm_drone()
+        self.leave_guided_mode()
+
+    def go_to_local_position(self, lat=0.0, lon=0.0, height=0.0, angle=0):
         """дрон направляется в указанные координаты относительно места старта
         :param lat: широта в м (положительное - вперёд, север; отрицательное - назад, юг)
         :param lon: долгота в м (положительное - направо, восток; отрицательное - налево, запад)
         :param height: высота в м (положительное - вверх, отрицательное - вниз)
         :param angle: градус поворота
         """
-        height *= -1
-        angle = math.radians(angle)
         self.connection.mav.send(mavutil.mavlink.MAVLink_set_position_target_local_ned_message(
             10, self.connection.target_system, self.connection.target_component, mavutil.mavlink.MAV_FRAME_LOCAL_NED,
-            int(0b100111111000), lat, lon, height, 0, 0, 0, 0, 0, 0, angle, 0))
+            int(0b100111111000), lat, lon, -height, 0, 0, 0, 0, 0, 0, math.radians(angle), 0))
 
-    def go_to_global_position(self, lat=0.0, lon=0.0, height=0.0, angle=0.0):
+    def go_to_global_position(self, lat=0.0, lon=0.0, height=0.0, angle=0):
         """дрон направляется в указанные глобальные
         :param lat: широта в градусах (положительное - север; отрицательное - юг)
         :param lon: долгота в м (положительное - восток; отрицательное - запад)
         :param height: высота в м (положительное - вверх, отрицательное - вниз)
         :param angle: градус поворота
         """
-        height *= -1
-        angle = math.radians(angle)
-        lat = int(lat * 10 ** 7)
-        lon = int(lon * 10 ** 7)
         self.connection.mav.send(mavutil.mavlink.MAVLink_set_position_target_global_int_message(
             10, self.connection.target_system, self.connection.target_component, mavutil.mavlink.MAV_FRAME_GLOBAL_INT,
-            int(0b100111111000), lat, lon, height, 0, 0, 0, 0, 0, 0, angle, 0))
+            int(0b100111111000), int(lat * 10 ** 7), int(lon * 10 ** 7), height, 0, 0, 0, 0, 0, 0, math.radians(angle),
+            0))
+        
+    def tech_move(self, lat=0.0, lon=0.0):
+        """не вызывать вручную, нужна для работы параллельного потока"""
+        geo = self.get_geo()
+        while round(geo.get('latitude'), 5) != round(lat, 5) and round(geo.get('longitude'), 5) != round(lon, 5):
+            geo = self.get_geo()
+            need_height = geo.get('altitude') + (10 - geo.get('altitude_ground'))
+            self.connection.mav.send(mavutil.mavlink.MAVLink_set_position_target_global_int_message(
+                10, self.connection.target_system, self.connection.target_component,
+                mavutil.mavlink.MAV_FRAME_GLOBAL_INT,
+                int(0b100111111000), int(lat * 10 ** 7), int(lon * 10 ** 7), need_height, 0, 0, 0, 0, 0, 0, 0, 0))
+            time.sleep(0.3)
 
     def set_speed(self, lat=0.0, lon=0.0, height=0.0, angle=0.0):
         """дрон направляется в указанные координаты относительно места старта
