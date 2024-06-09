@@ -185,6 +185,7 @@ class MainWindow(ctk.CTkFrame):
     def on_ctrl_space(self, event):
         if len(self.drone_list[self.current_drone] != 0):
             drone = self.drone_list[self.current_drone]
+            drone.auto_start()
 
     current_speed = 1
     current_mode = False
@@ -221,10 +222,20 @@ class MainWindow(ctk.CTkFrame):
 
             self.create_drone_marker(name="дрон 1", coords=[position.get("latitude"), position.get("longitude")])
             self.map_widget.set_position(*self.list_drone_positions[self.current_drone].position)
+            self.after(500, self.update_dron_position())
 
         self.map_widget.add_right_click_menu_command(label="отправить дрон сюда",
                                                 command=self.add_marker_event,
                                                 pass_coords=True)
+
+    def update_dron_position(self):
+        drone = self.drone_list[self.current_drone]
+        position = drone.get_geo()
+
+        marker = self.list_drone_positions[self.current_drone]
+        marker.set_position(position.get("latitude"), position.get("longitude"))
+
+        self.after(500, self.update_dron_position())
 
     def new_view(self):
         image = ctk.CTkImage(
