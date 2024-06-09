@@ -200,9 +200,15 @@ class MainWindow(ctk.CTkFrame):
     def create_path_marker(self, coords):
         try:
             self.go_to_position = self.map_widget.set_marker(coords[0], coords[1], text="точка назначения")
+            self.go_to_position.text_color = "white"
             self.map_widget.delete_all_path()
             self.map_widget.set_path([self.list_drone_positions[self.current_drone].position, self.go_to_position.position])
-        except: pass
+
+            drone = self.drone_list[self.current_drone]
+            drone.go_to_global_position_safe(coords[0], coords[1])
+
+        except:
+            pass
 
     def update_path_marker(self):
         try:
@@ -213,6 +219,7 @@ class MainWindow(ctk.CTkFrame):
 
     def create_drone_marker(self, name: str, coords: list):
         position = self.map_widget.set_marker(coords[0], coords[1], text=name)
+        position.text_color = "white"
         self.map_widget.set_zoom(12)
         self.list_drone_positions.append(position)
 
@@ -252,7 +259,7 @@ class MainWindow(ctk.CTkFrame):
         self.update_path_marker()
 
         time.sleep(0.2)
-        self.update_path_marker()
+        self.update_dron_position()
 
     def new_view(self):
         image = ctk.CTkImage(
