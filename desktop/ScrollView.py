@@ -5,6 +5,7 @@ import customtkinter as ctk
 
 import desktop_start
 
+import main_window
 
 class frame(ctk.CTkFrame):
     def __init__(self, base: desktop_start, obj, master, **kwargs ):
@@ -27,7 +28,10 @@ class frame(ctk.CTkFrame):
         button.grid(row=0, column=0, padx=5, pady=5)
 
     def show(self, host, port):
-        self.base.open_main_menu(host, port)
+        if main_window.cdrone < 2:
+            main_window.cdrone += 1
+        else:
+            main_window.cdrone = 0
 
 
 class ScrollView(ctk.CTkScrollableFrame):

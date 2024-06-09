@@ -12,6 +12,7 @@ import ScrollView
 import KeyProcesses
 import drone_control
 
+cdrone = 0
 
 class MainWindow(ctk.CTkFrame):
 
@@ -27,9 +28,10 @@ class MainWindow(ctk.CTkFrame):
 
     def __init__(self, host: str, port: str, base, master, **kwargs):
         super().__init__(master, **kwargs)
+        global cdrone
         self.base = base
         self.drone_list = list()
-        self.current_drone = 0
+        self.current_drone = cdrone
 
         with open("../Data/drone.json", "r", encoding="utf-8") as file:
             data = json.load(file)
