@@ -1,5 +1,6 @@
 from pymavlink import mavutil
 import math
+import time
 
 
 class Drone:
@@ -43,6 +44,13 @@ class Drone:
         """
         self.connection.mav.command_long_send(self.connection.target_system, self.connection.target_component,
                                               mavutil.mavlink.MAV_CMD_NAV_TAKEOFF, 0, 0, 0, 0, 0, 0, 0, height)
+
+    def auto_start(self, height=2.0):
+        self.enter_guided_mode()
+        while self.get_geo().get('altitude_ground') <= 0.05:
+            self.arm_drone()
+            self.take_off(height)
+            time.sleep(0.3)
 
     def go_to_local_position(self, lat=0.0, lon=0.0, height=0.0, angle=0.0):
         """дрон направляется в указанные координаты относительно места старта
@@ -132,3 +140,16 @@ class Drone:
             'angle': msg.hdg / 100
         }
         return position
+
+    def get_photo(self):
+        """не работает, но есть"""
+        self.connection.mav.command_long_send(self.connection.target_system, self.connection.target_component,
+                                              mavutil.mavlink.MAV_CMD_DO_DIGICAM_CONFIGURE, 0, 1, 24, 4, 80, 0, 0, 0.1)
+
+        self.connection.mav.command_long_send(self.connection.target_system, self.connection.target_component,
+                                              mavutil.mavlink.MAV_CMD_DO_DIGICAM_CONTROL, 0, 1, 0, 0, 1, 1, 0, 0)
+
+        self.connection.mav.request_data_stream_send(self.connection.target_system, self.connection.target_component,
+                                                     mavutil.mavlink.MAV_DATA_STREAM_ALL, 1, 1)
+
+        msg = self.connection.recv_match(type="", blocking=True)
