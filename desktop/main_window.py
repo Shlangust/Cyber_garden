@@ -31,9 +31,7 @@ class MainWindow(ctk.CTkFrame):
         self.drone_list = list()
         self.current_drone = 0
 
-        # Создаем поток
         thread = threading.Thread(target=self.create_connect_drone)
-        # Запускаем поток
         thread.start()
 
         self.start()
@@ -148,11 +146,34 @@ class MainWindow(ctk.CTkFrame):
         )
         text_2.grid(column=2, row=0)
 
+        top_frame = ctk.CTkFrame(
+            master=self.main_frame,
+            fg_color="transparent"
+        )
+        top_frame.grid(column=5, row=0, sticky=tk.W)
+
+        top_frame.grid_columnconfigure(index=0, weight=0)
+        top_frame.grid_columnconfigure(index=0, weight=0)
+
+        my_image = ctk.CTkImage(light_image=Image.open("../Image/stats-image.png"),
+                                dark_image=Image.open("../Image/stats-image.png"),
+                                size=(18, 18))
+        self.image_button = ctk.CTkButton(
+            master=top_frame,
+            width=25, height=25,
+            image=my_image,
+            fg_color="transparent",
+            hover=False,
+            text="",
+            command=self.new_view
+        )
+        self.image_button.grid(column=0, row=0, padx=(0, 5), sticky=tk.S)
+
         my_image = ctk.CTkImage(light_image=Image.open("../Image/info-image.png"),
                                 dark_image=Image.open("../Image/info-image.png"),
                                 size=(20, 20))
-        image_label1 = ctk.CTkLabel(master=self.main_frame, image=my_image, text="")
-        image_label1.grid(column=5, row=0, padx=(0, 10), sticky=tk.W)
+        image_label1 = ctk.CTkLabel(master=top_frame, image=my_image, text="")
+        image_label1.grid(column=1, row=0, padx=(0, 10), sticky=tk.W)
 
         image_label1.bind("<Enter>", lambda event: self.create_inform_menu())
         image_label1.bind("<Leave>", lambda event: self.delete_inform_menu())
@@ -162,12 +183,42 @@ class MainWindow(ctk.CTkFrame):
 
     current_speed = 1
     current_mode = False
+    go_to_position = None
+    list_drone_positions = list()
+
+    def create_path_marker(self, coords):
+        self.go_to_position = self.map_widget.set_marker(coords[0], coords[1], text="точка назначения")
+        self.map_widget.set_path([self.list_drone_positions[self.current_drone].position, self.go_to_position.position])
+
+    def create_drone_marker(self, name: str, coords: list):
+        position = self.map_widget.set_marker(coords[0], coords[1], text=name)
+        self.map_widget.set_zoom(8)
+        self.list_drone_positions.append(position)
+
+    def add_marker_event(self, coords):
+        if self.go_to_position is None:
+            self.create_path_marker(coords)
+        else:
+            self.go_to_position.delete()
+            self.create_path_marker(coords)
+
+    drone_current_position = None
 
     def create_card(self):
         self.map_widget = TkinterMapView(self, corner_radius=10)
         self.map_widget.grid(row=1, column=1, columnspan=2, rowspan=2, sticky=tk.NSEW, padx=0, pady=0)
         self.map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
-        # self.map_widget.set_address("ростов на дону")
+
+        if len(self.drone_list) != 0:
+            drone = self.drone_list[self.current_drone]
+            position = drone.get_geo()
+
+            self.create_drone_marker(name="дрон 1", coords=[position.get("latitude"), position.get("longitude")])
+            self.map_widget.set_position(*self.list_drone_positions[self.current_drone].position)
+
+        self.map_widget.add_right_click_menu_command(label="отправить дрон сюда",
+                                                command=self.add_marker_event,
+                                                pass_coords=True)
 
     def new_view(self):
         image = ctk.CTkImage(
