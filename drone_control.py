@@ -1,3 +1,5 @@
+import threading
+
 from pymavlink import mavutil
 import math
 import time
@@ -96,6 +98,14 @@ class Drone:
                 mavutil.mavlink.MAV_FRAME_GLOBAL_INT,
                 int(0b100111111000), int(lat * 10 ** 7), int(lon * 10 ** 7), need_height, 0, 0, 0, 0, 0, 0, 0, 0))
             time.sleep(0.3)
+
+    def go_to_global_position_safe(self, lat=0.0, lon=0.0):
+        """безопасно летит к указанной позиции с поддержанием высоты
+        :param lat: широта в градусах (положительное - север; отрицательное - юг)
+        :param lon: долгота в м (положительное - восток; отрицательное - запад)
+        """
+        thread = threading.Thread(target=self.tech_move, args=(lat, lon))
+        thread.start()
 
     def set_speed(self, lat=0.0, lon=0.0, height=0.0, angle=0.0):
         """дрон направляется в указанные координаты относительно места старта
