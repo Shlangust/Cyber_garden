@@ -7,6 +7,7 @@ import time
 
 class Drone:
     connection_status = True
+    autopilot = False
 
     def __init__(self, host: str, port: str | int, protocol='tcp'):
         """создаёт подключение к дрону по указанному порту и хосту
@@ -86,10 +87,11 @@ class Drone:
             10, self.connection.target_system, self.connection.target_component, mavutil.mavlink.MAV_FRAME_GLOBAL_INT,
             int(0b100111111000), int(lat * 10 ** 7), int(lon * 10 ** 7), height, 0, 0, 0, 0, 0, 0, math.radians(angle),
             0))
-        
+
     def tech_move(self, lat=0.0, lon=0.0):
         """не вызывать вручную, нужна для работы параллельного потока"""
         geo = self.get_geo()
+        self.autopilot = True
         while round(geo.get('latitude'), 5) != round(lat, 5) and round(geo.get('longitude'), 5) != round(lon, 5):
             geo = self.get_geo()
             need_height = geo.get('altitude') + (10 - geo.get('altitude_ground'))
@@ -98,6 +100,7 @@ class Drone:
                 mavutil.mavlink.MAV_FRAME_GLOBAL_INT,
                 int(0b100111111000), int(lat * 10 ** 7), int(lon * 10 ** 7), need_height, 0, 0, 0, 0, 0, 0, 0, 0))
             time.sleep(0.3)
+        self.autopilot = False
 
     def go_to_global_position_safe(self, lat=0.0, lon=0.0):
         """безопасно летит к указанной позиции с поддержанием высоты
