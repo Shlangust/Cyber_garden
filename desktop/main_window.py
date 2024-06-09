@@ -1,3 +1,4 @@
+import json
 import threading
 import time
 import tkinter as tk
@@ -14,25 +15,28 @@ import drone_control
 
 class MainWindow(ctk.CTkFrame):
 
-    def create_connect_drone(self):
-        self.obj = drone_control.Drone(host="localhost", port="5762")
+    def create_connect_drone(self, host, port):
+        print(host, port)
+        self.obj = drone_control.Drone(host=host, port=port)
 
         if not self.obj.connection_status:
             result = win32api.MessageBox(0, 'Подключение к дрону не удалось.\n', 'SkyGrid - Error', 5)
             if result == 4:
-                self.create_connect_drone()
+                self.create_connect_drone(host, port)
         else:
             self.drone_list.append(self.obj)
 
-    def __init__(self, base, master, **kwargs):
+    def __init__(self, host: str, port: str, base, master, **kwargs):
         super().__init__(master, **kwargs)
 
         self.base = base
         self.drone_list = list()
         self.current_drone = 0
 
-        thread = threading.Thread(target=self.create_connect_drone)
-        thread.start()
+        with open("../Data/drone.json", "r", encoding="utf-8") as file:
+            data = json.load(file)
+            thread = threading.Thread(target=lambda: self.create_connect_drone(data["host"], data["port"]))
+            thread.start()
 
         self.start()
 
@@ -46,6 +50,7 @@ class MainWindow(ctk.CTkFrame):
 
         scroll = ScrollView.ScrollView(
             master=self,
+            base=self,
             corner_radius=0,
             fg_color="transparent",
             scrollbar_fg_color="#F2F2F2",
@@ -220,7 +225,6 @@ class MainWindow(ctk.CTkFrame):
         except:
             pass
 
-
     def create_drone_marker(self, name: str, coords: list):
         position = self.map_widget.set_marker(coords[0], coords[1], text=name)
         position.text_color = "white"
@@ -334,7 +338,7 @@ class MainWindow(ctk.CTkFrame):
         self.frame_menu_battery = ctk.CTkFrame(
             master=self,
             corner_radius=0,
-            width=170, height=165,
+            width=170, height=175,
             fg_color="white",
         )
         self.frame_menu_battery.grid(column=1, row=1, columnspan=2, sticky=tk.SE, padx=(0, 10), pady=(0, 5))

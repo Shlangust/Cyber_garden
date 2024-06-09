@@ -33,8 +33,14 @@ class Window(ctk.CTk):
         self.grid_rowconfigure(index=0, weight=1)
         self.grid_columnconfigure(index=0, weight=1)
 
-        window = main_window.MainWindow(self, self, fg_color="#F2F2F2")
-        window.grid(row=0, column=0, sticky=tk.NSEW)
+        self.window = enter_window.enterWindow(self, self, fg_color="#F2F2F2")
+        self.window.grid(row=0, column=0, sticky=tk.NSEW)
+
+    def open_main_menu(self, host, port):
+        self.window.destroy()
+
+        self.window = main_window.MainWindow(host, port, self, self, fg_color="#F2F2F2")
+        self.window.grid(row=0, column=0, sticky=tk.NSEW)
 
 
 if __name__ == "__main__":

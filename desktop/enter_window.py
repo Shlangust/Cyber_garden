@@ -3,14 +3,15 @@ import tkinter as tk
 import customtkinter as ctk
 
 import ScrollView
+import desktop_start
 import KeyProcesses
 import drone_control
 
 
 class enterWindow(ctk.CTkFrame):
-    def __init__(self, master, **kwargs):
+    def __init__(self, master, window: desktop_start, **kwargs):
         super().__init__(master, **kwargs)
-
+        self.window: desktop_start = window
         self.start()
 
     def start(self):
@@ -25,7 +26,7 @@ class enterWindow(ctk.CTkFrame):
 
         main_label = ctk.CTkLabel(
             master=self,
-            text="НАЗВАНИЕ",
+            text="SkyGrid",
             fg_color="transparent",
             font=("MONTSERRAT", 30, "bold")
         )
@@ -33,6 +34,7 @@ class enterWindow(ctk.CTkFrame):
 
         scroll = ScrollView.ScrollView(
             master=self,
+            base=self.window,
             width=200,
             corner_radius=0,
             fg_color="transparent",
@@ -81,6 +83,7 @@ class enterWindow(ctk.CTkFrame):
         )
         self.entry_3.grid(row=3, column=1, columnspan=2, sticky=tk.NSEW, pady=(10, 0), padx=(0, 10))
 
+
         button = ctk.CTkButton(
             master=self,
             text="ПОДКЛЮЧИТЬСЯ",
@@ -95,4 +98,5 @@ class enterWindow(ctk.CTkFrame):
         button.grid(row=4, column=1, columnspan=2, sticky=tk.S, pady=(0, 25))
 
     def button_click(self):
-        print("нажатие кнопки!")
+
+        self.window.open_main_menu(self.entry_1.get(), self.entry_2.get())
