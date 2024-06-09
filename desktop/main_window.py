@@ -17,7 +17,9 @@ class MainWindow(ctk.CTkFrame):
         self.obj = drone_control.Drone(host="localhost", port="5762")
 
         if not self.obj.connection_status:
-            win32api.MessageBox(0, 'Подключение к дрону не удалось.\n', 'Error', 4)
+            result = win32api.MessageBox(0, 'Подключение к дрону не удалось.\n', 'Error', 5)
+            if result == 4:
+                self.create_connect_drone()
         else:
             self.obj.enter_guided_mode()
             self.drone_list.append(self.obj)
@@ -69,10 +71,7 @@ class MainWindow(ctk.CTkFrame):
         )
         frame.grid(row=1, column=1, columnspan=2, rowspan=2, sticky=tk.NSEW, padx=0, pady=0)
 
-        self.map_widget = TkinterMapView(self, corner_radius=10)
-        self.map_widget.grid(row=1, column=1, columnspan=2, rowspan=2, sticky=tk.NSEW, padx=0, pady=0)
-        self.map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
-        self.map_widget.set_address("ростов на дону")
+        self.create_card()
 
         self.main_frame = ctk.CTkFrame(
             master=self,
@@ -89,9 +88,9 @@ class MainWindow(ctk.CTkFrame):
         self.main_frame.grid_columnconfigure(index=4, weight=1)
         self.main_frame.grid_columnconfigure(index=5, weight=0)
 
-        my_image = ctk.CTkImage(light_image=Image.open("../Image/free-icon-font-battery-three-quarters-9234404.png"),
-                                          dark_image=Image.open("../Image/free-icon-font-battery-three-quarters-9234404.png"),
-                                          size=(20, 20))
+        my_image = ctk.CTkImage(light_image=Image.open("../Image/battery-image.png"),
+                                dark_image=Image.open("../Image/battery-image.png"),
+                                size=(20, 20))
         image_label = ctk.CTkLabel(
             master=self.main_frame,
             image=my_image,
@@ -108,17 +107,19 @@ class MainWindow(ctk.CTkFrame):
         self.battery_label.grid(column=1, row=0)
         self.battery_label.after(5000, self.current_battery)
 
-        my_image = ctk.CTkImage(light_image=Image.open("../Image/free-icon-font-drone-alt-11739931.png"),
-                                dark_image=Image.open("../Image/free-icon-font-drone-alt-11739931.png"),
+        my_image = ctk.CTkImage(light_image=Image.open("../Image/world-image.png"),
+                                dark_image=Image.open("../Image/world-image.png"),
                                 size=(20, 20))
-        image_label = ctk.CTkLabel(master=self.main_frame, image=my_image, text="")
-        image_label.grid(column=2, row=0, padx=(10, 5), sticky=tk.E)
-
-        my_image = ctk.CTkImage(light_image=Image.open("../Image/free-icon-font-world-3916990.png"),
-                                dark_image=Image.open("../Image/free-icon-font-world-3916990.png"),
-                                size=(20, 20))
-        image_label = ctk.CTkLabel(master=self.main_frame, image=my_image, text="")
-        image_label.grid(column=3, row=0, padx=(10, 5), sticky=tk.W)
+        self.image_button = ctk.CTkButton(
+            master=self.main_frame,
+            width=25, height=25,
+            image=my_image,
+            fg_color="transparent",
+            hover=False,
+            text="",
+            command=self.new_view
+        )
+        self.image_button.grid(column=3, row=0, padx=(10, 5), sticky=tk.S)
 
 
         frame_slider = ctk.CTkFrame(
@@ -147,8 +148,8 @@ class MainWindow(ctk.CTkFrame):
         )
         text_2.grid(column=2, row=0)
 
-        my_image = ctk.CTkImage(light_image=Image.open("../Image/free-icon-font-info-3916699.png"),
-                                dark_image=Image.open("../Image/free-icon-font-info-3916699.png"),
+        my_image = ctk.CTkImage(light_image=Image.open("../Image/info-image.png"),
+                                dark_image=Image.open("../Image/info-image.png"),
                                 size=(20, 20))
         image_label1 = ctk.CTkLabel(master=self.main_frame, image=my_image, text="")
         image_label1.grid(column=5, row=0, padx=(0, 10), sticky=tk.W)
@@ -160,6 +161,47 @@ class MainWindow(ctk.CTkFrame):
         self.base.bind('<KeyPress>', self.on_key_press)
 
     current_speed = 1
+    current_mode = False
+
+    def create_card(self):
+        self.map_widget = TkinterMapView(self, corner_radius=10)
+        self.map_widget.grid(row=1, column=1, columnspan=2, rowspan=2, sticky=tk.NSEW, padx=0, pady=0)
+        self.map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
+        # self.map_widget.set_address("ростов на дону")
+
+    def new_view(self):
+        image = ctk.CTkImage(
+            light_image=Image.open("../Image/drone-image.png"),
+            dark_image=Image.open("../Image/drone-image.png"),
+            size=(20, 20)
+        )
+
+        image_1 = ctk.CTkImage(
+            light_image=Image.open("../Image/world-image.png"),
+            dark_image=Image.open("../Image/world-image.png"),
+            size=(20, 20)
+        )
+
+        self.image_button.configure(image=image_1 if self.current_mode else image)
+        if not self.current_mode:
+            self.map_widget.destroy()
+
+            self.camera = ctk.CTkFrame(
+                master=self,
+                corner_radius=10,
+                fg_color="black"
+            )
+            self.camera.grid(row=1, column=1, columnspan=2, rowspan=2, sticky=tk.NSEW, padx=0, pady=0)
+            self.main_frame.lift()
+        else:
+            self.camera.destroy()
+            self.create_card()
+
+            self.main_frame.lift()
+
+        # frame.tag_raise(tag_name)
+
+        self.current_mode = not self.current_mode
 
     def slider_event(self, value):
         self.current_speed = round(value / 10, 3)
@@ -195,10 +237,34 @@ class MainWindow(ctk.CTkFrame):
             self.frame_menu_battery.destroy()
 
     def create_inform_menu(self):
-        print("Создание меню")
+        self.frame_menu_battery = ctk.CTkFrame(
+            master=self,
+            corner_radius=0,
+            width=170, height=157,
+            fg_color="white",
+        )
+        self.frame_menu_battery.grid(column=1, row=1, columnspan=2, sticky=tk.SE, padx=(0, 10), pady=(0, 5))
+
+        self.inform = ctk.CTkLabel(
+            master=self.frame_menu_battery,
+            compound="left",
+            justify="left",
+            text="Управление дроном:\n"
+                 "W - вперед \n"
+                 "S - назад \n"
+                 "A - налево \n"
+                 "D - вправо \n"
+                 "Q - поворот налево \n"
+                 "E - поворот направо \n"
+                 "Shift - спуск дрона \n"
+                 "Space - подьем дрона \n"
+                 "Ctrl + Space - старт дрона"
+        )
+        self.inform.place(x=5, y=5)
 
     def delete_inform_menu(self):
-        print("Удаление меню")
+        if hasattr(self, 'frame_menu_battery'):
+            self.frame_menu_battery.destroy()
 
     def current_battery(self):
         if len(self.drone_list) != 0:
