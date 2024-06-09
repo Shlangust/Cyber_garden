@@ -207,6 +207,9 @@ class MainWindow(ctk.CTkFrame):
             drone = self.drone_list[self.current_drone]
             drone.go_to_global_position_safe(coords[0], coords[1])
 
+            if not drone.autopilot:
+                self.map_widget.delete_all_path()
+
         except:
             pass
 
@@ -216,6 +219,7 @@ class MainWindow(ctk.CTkFrame):
             self.map_widget.set_path([self.list_drone_positions[self.current_drone].position, self.go_to_position.position])
         except:
             pass
+
 
     def create_drone_marker(self, name: str, coords: list):
         position = self.map_widget.set_marker(coords[0], coords[1], text=name)
@@ -290,8 +294,6 @@ class MainWindow(ctk.CTkFrame):
             self.create_card()
 
             self.main_frame.lift()
-
-        # frame.tag_raise(tag_name)
 
         self.current_mode = not self.current_mode
 
@@ -384,11 +386,3 @@ class MainWindow(ctk.CTkFrame):
             KeyProcesses.press_shift(self.drone_list[self.current_drone], self.current_speed)
         elif event.keysym == 'space':
             KeyProcesses.press_space(self.drone_list[self.current_drone], self.current_speed)
-        elif event.keysym == 'Up':
-            KeyProcesses.press_up_arrow(self.drone_list[self.current_drone], self.current_speed)
-        elif event.keysym == 'Down':
-            KeyProcesses.press_down_arrow(self.drone_list[self.current_drone], self.current_speed)
-        elif event.keysym == 'Left':
-            KeyProcesses.press_left_arrow(self.drone_list[self.current_drone], self.current_speed)
-        elif event.keysym == 'Right':
-            KeyProcesses.press_right_arrow(self.drone_list[self.current_drone], self.current_speed)
