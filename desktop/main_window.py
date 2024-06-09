@@ -16,7 +16,6 @@ import drone_control
 class MainWindow(ctk.CTkFrame):
 
     def create_connect_drone(self, host, port):
-        print(host, port)
         self.obj = drone_control.Drone(host=host, port=port)
 
         if not self.obj.connection_status:
@@ -201,26 +200,39 @@ class MainWindow(ctk.CTkFrame):
     go_to_position = None
     list_drone_positions = list()
 
+    def bad_trhread(self):
+        drone = self.drone_list[self.current_drone]
+        while not drone.time_to_delete:
+            time.sleep(0.1)
+        drone.time_to_delete = False
+        self.go_to_position.delete()
+        self.map_widget.delete_all_path()
+
     def create_path_marker(self, coords):
         try:
             self.go_to_position = self.map_widget.set_marker(coords[0], coords[1], text="точка назначения")
             self.go_to_position.text_color = "white"
             self.map_widget.delete_all_path()
-            self.map_widget.set_path([self.list_drone_positions[self.current_drone].position, self.go_to_position.position])
+            self.map_widget.set_path([self.list_drone_positions[self.current_drone].position,
+                                      self.go_to_position.position])
 
             drone = self.drone_list[self.current_drone]
             drone.go_to_global_position_safe(coords[0], coords[1])
 
-            if not drone.autopilot:
-                self.map_widget.delete_all_path()
+            threading.Thread(target=self.bad_trhread).start()
 
         except:
             pass
 
     def update_path_marker(self):
         try:
+            drone = self.drone_list[self.current_drone]
             self.map_widget.delete_all_path()
-            self.map_widget.set_path([self.list_drone_positions[self.current_drone].position, self.go_to_position.position])
+            print(drone.autopilot)
+            if drone.autopilot:
+                self.map_widget.set_path([self.list_drone_positions[self.current_drone].position,
+                                          self.go_to_position.position])
+                self.go_to_position.text_color = "white"
         except:
             pass
 
@@ -244,9 +256,10 @@ class MainWindow(ctk.CTkFrame):
         self.map_widget.grid(row=1, column=1, columnspan=2, rowspan=2, sticky=tk.NSEW, padx=0, pady=0)
         self.map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
         if len(self.drone_list) != 0:
-            drone = self.drone_list[self.current_drone]
-            position = drone.get_geo()
-            self.create_drone_marker(name="дрон 1", coords=[position.get("latitude"), position.get("longitude")])
+            for i in range(len(self.drone_list)):
+                drone = self.drone_list[i]
+                position = drone.get_geo()
+                self.create_drone_marker(name=f"дрон {i + 1}", coords=[position.get("latitude"), position.get("longitude")])
             self.map_widget.set_position(*self.list_drone_positions[self.current_drone].position)
             thread = threading.Thread(target=self.update_dron_position)
             thread.start()

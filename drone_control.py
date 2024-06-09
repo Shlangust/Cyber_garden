@@ -8,6 +8,7 @@ import time
 class Drone:
     connection_status = True
     autopilot = False
+    time_to_delete = False
 
     def __init__(self, host: str, port: str | int, protocol='tcp'):
         """создаёт подключение к дрону по указанному порту и хосту
@@ -101,6 +102,7 @@ class Drone:
                 int(0b100111111000), int(lat * 10 ** 7), int(lon * 10 ** 7), need_height, 0, 0, 0, 0, 0, 0, 0, 0))
             time.sleep(0.3)
         self.autopilot = False
+        self.time_to_delete = True
 
     def go_to_global_position_safe(self, lat=0.0, lon=0.0):
         """безопасно летит к указанной позиции с поддержанием высоты
