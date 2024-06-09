@@ -1,8 +1,10 @@
+import threading
 import tkinter as tk
 
 import customtkinter as ctk
 from tkintermapview import TkinterMapView
 from PIL import Image
+import win32api
 
 import ScrollView
 import KeyProcesses
@@ -10,6 +12,16 @@ import drone_control
 
 
 class MainWindow(ctk.CTkFrame):
+
+    def create_connect_drone(self):
+        self.obj = drone_control.Drone(host="localhost", port="5762")
+
+        if not self.obj.connection_status:
+            win32api.MessageBox(0, 'Подключение к дрону не удалось.\n', 'Error', 4)
+        else:
+            self.obj.enter_guided_mode()
+            self.drone_list.append(self.obj)
+
     def __init__(self, base, master, **kwargs):
         super().__init__(master, **kwargs)
 
@@ -17,9 +29,10 @@ class MainWindow(ctk.CTkFrame):
         self.drone_list = list()
         self.current_drone = 0
 
-        self.obj = drone_control.Drone(host="localhost", port="5762")
-        self.obj.enter_guided_mode()
-        self.drone_list.append(self.obj)
+        # Создаем поток
+        thread = threading.Thread(target=self.create_connect_drone)
+        # Запускаем поток
+        thread.start()
 
         self.start()
 
@@ -58,7 +71,8 @@ class MainWindow(ctk.CTkFrame):
 
         self.map_widget = TkinterMapView(self, corner_radius=10)
         self.map_widget.grid(row=1, column=1, columnspan=2, rowspan=2, sticky=tk.NSEW, padx=0, pady=0)
-        # self.map_widget.set_address("Москва")
+        self.map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
+        self.map_widget.set_address("ростов на дону")
 
         self.main_frame = ctk.CTkFrame(
             master=self,
@@ -84,12 +98,12 @@ class MainWindow(ctk.CTkFrame):
             text=""
         )
         image_label.grid(column=0, row=0, padx=(10, 5))
-        image_label.bind("<Enter>", lambda event: self.create_menu())
-        image_label.bind("<Leave>", lambda event: self.delete_menu())
+        image_label.bind("<Enter>", lambda event: self.create_battery_menu())
+        image_label.bind("<Leave>", lambda event: self.delete_battery_menu())
 
         self.battery_label = ctk.CTkLabel(
             master=self.main_frame,
-            text="100%"
+            text="100%" if len(self.drone_list) != 0 else "--%"
         )
         self.battery_label.grid(column=1, row=0)
         self.battery_label.after(5000, self.current_battery)
@@ -136,8 +150,12 @@ class MainWindow(ctk.CTkFrame):
         my_image = ctk.CTkImage(light_image=Image.open("../Image/free-icon-font-info-3916699.png"),
                                 dark_image=Image.open("../Image/free-icon-font-info-3916699.png"),
                                 size=(20, 20))
-        image_label = ctk.CTkLabel(master=self.main_frame, image=my_image, text="")
-        image_label.grid(column=5, row=0, padx=(0, 10), sticky=tk.W)
+        image_label1 = ctk.CTkLabel(master=self.main_frame, image=my_image, text="")
+        image_label1.grid(column=5, row=0, padx=(0, 10), sticky=tk.W)
+
+        image_label1.bind("<Enter>", lambda event: self.create_inform_menu())
+        image_label1.bind("<Leave>", lambda event: self.delete_inform_menu())
+
 
         self.base.bind('<KeyPress>', self.on_key_press)
 
@@ -146,14 +164,17 @@ class MainWindow(ctk.CTkFrame):
     def slider_event(self, value):
         self.current_speed = round(value / 10, 3)
 
-    def create_menu(self):
+    def create_battery_menu(self):
+        if len(self.drone_list) == 0:
+            return
+
         obj = self.drone_list[self.current_drone]
         data = obj.get_battery_status()
 
         self.frame_menu_battery = ctk.CTkFrame(
             master=self,
             corner_radius=0,
-            width=170, height=85,
+            width=200, height=80,
             fg_color="white",
         )
         self.frame_menu_battery.grid(column=1, row=1, columnspan=2, sticky=tk.SW, padx=(10, 0), pady=(0, 5))
@@ -162,20 +183,28 @@ class MainWindow(ctk.CTkFrame):
             master=self.frame_menu_battery,
             compound="left",
             justify="left",
-            text=f"Напряжение: {data.get('voltage')}\n"
-                 f"Температура: {data.get('temperature')}\n"
-                 f"Потребленный заряд: {data.get('consumed_charge')}\n"
-                 f"Потребленная энергия: {data.get('consumed_energy')}\n"
+            text=f"Напряжение: {data.get('voltage')} V\n"
+                 f"Температура: {data.get('temperature')} ℃\n"
+                 f"Потребленный заряд: {data.get('consumed_charge')} мA/ч\n"
+                 f"Потребленная энергия: {data.get('consumed_energy')} Дж\n"
         )
         self.inform.place(x=5, y=5)
 
-    def delete_menu(self):
-        self.frame_menu_battery.destroy()
+    def delete_battery_menu(self):
+        if hasattr(self, 'frame_menu_battery'):
+            self.frame_menu_battery.destroy()
+
+    def create_inform_menu(self):
+        print("Создание меню")
+
+    def delete_inform_menu(self):
+        print("Удаление меню")
 
     def current_battery(self):
-        obj = self.drone_list[self.current_drone]
-        self.battery_label.configure(text=f"{obj.get_battery_status().get('charge')}%")
-        self.after(5000, self.current_battery)
+        if len(self.drone_list) != 0:
+            obj = self.drone_list[self.current_drone]
+            self.battery_label.configure(text=f"{obj.get_battery_status().get('charge')}%")
+            self.after(5000, self.current_battery)
 
     def on_key_press(self, event):
         if event.keysym in ('W', 'w'):
