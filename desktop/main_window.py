@@ -301,7 +301,7 @@ class MainWindow(ctk.CTkFrame):
         self.frame_menu_battery = ctk.CTkFrame(
             master=self,
             corner_radius=0,
-            width=200, height=80,
+            width=205, height=80,
             fg_color="white",
         )
         self.frame_menu_battery.grid(column=1, row=1, columnspan=2, sticky=tk.SW, padx=(10, 0), pady=(0, 5))
@@ -325,7 +325,7 @@ class MainWindow(ctk.CTkFrame):
         self.frame_menu_battery = ctk.CTkFrame(
             master=self,
             corner_radius=0,
-            width=170, height=157,
+            width=170, height=165,
             fg_color="white",
         )
         self.frame_menu_battery.grid(column=1, row=1, columnspan=2, sticky=tk.SE, padx=(0, 10), pady=(0, 5))
