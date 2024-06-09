@@ -180,6 +180,11 @@ class MainWindow(ctk.CTkFrame):
 
 
         self.base.bind('<KeyPress>', self.on_key_press)
+        self.base.bind('<Control-space>', self.on_ctrl_space)
+
+    def on_ctrl_space(self, event):
+        if len(self.drone_list[self.current_drone] != 0):
+            drone = self.drone_list[self.current_drone]
 
     current_speed = 1
     current_mode = False
@@ -188,11 +193,12 @@ class MainWindow(ctk.CTkFrame):
 
     def create_path_marker(self, coords):
         self.go_to_position = self.map_widget.set_marker(coords[0], coords[1], text="точка назначения")
+        self.map_widget.delete_all_path()
         self.map_widget.set_path([self.list_drone_positions[self.current_drone].position, self.go_to_position.position])
 
     def create_drone_marker(self, name: str, coords: list):
         position = self.map_widget.set_marker(coords[0], coords[1], text=name)
-        self.map_widget.set_zoom(8)
+        self.map_widget.set_zoom(12)
         self.list_drone_positions.append(position)
 
     def add_marker_event(self, coords):
