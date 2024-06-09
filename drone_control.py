@@ -52,6 +52,16 @@ class Drone:
             self.take_off(height)
             time.sleep(0.3)
 
+    def auto_land(self):
+        while self.get_geo().get('altitude_ground') > 3:
+            self.set_speed(height=-1)
+            time.sleep(0.3)
+        while self.get_geo().get('altitude_ground') > 0.05:
+            self.set_speed(height=-0.15)
+            time.sleep(0.3)
+        self.disarm_drone()
+        self.leave_guided_mode()
+
     def go_to_local_position(self, lat=0.0, lon=0.0, height=0.0, angle=0.0):
         """дрон направляется в указанные координаты относительно места старта
         :param lat: широта в м (положительное - вперёд, север; отрицательное - назад, юг)

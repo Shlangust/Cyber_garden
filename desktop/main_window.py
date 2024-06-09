@@ -179,11 +179,18 @@ class MainWindow(ctk.CTkFrame):
 
         self.base.bind('<KeyPress>', self.on_key_press)
         self.base.bind('<Control-space>', self.on_ctrl_space)
+        self.bind('<Control-Shift-Key>', self.on_ctrl_shift)
 
     def on_ctrl_space(self, event):
         if len(self.drone_list) != 0:
             drone = self.drone_list[self.current_drone]
             drone.auto_start()
+
+    def on_ctrl_shift(self):
+        if len(self.drone_list) != 0:
+            drone = self.drone_list[self.current_drone]
+            drone.auto_land()
+
 
     current_speed = 1
     current_mode = False
@@ -192,6 +199,10 @@ class MainWindow(ctk.CTkFrame):
 
     def create_path_marker(self, coords):
         self.go_to_position = self.map_widget.set_marker(coords[0], coords[1], text="точка назначения")
+        self.map_widget.delete_all_path()
+        self.map_widget.set_path([self.list_drone_positions[self.current_drone].position, self.go_to_position.position])
+
+    def update_path_marker(self):
         self.map_widget.delete_all_path()
         self.map_widget.set_path([self.list_drone_positions[self.current_drone].position, self.go_to_position.position])
 
@@ -220,7 +231,7 @@ class MainWindow(ctk.CTkFrame):
 
             self.create_drone_marker(name="дрон 1", coords=[position.get("latitude"), position.get("longitude")])
             self.map_widget.set_position(*self.list_drone_positions[self.current_drone].position)
-            self.after(500, self.update_dron_position())
+            thread = threading.Thread(target=self.update_dron_position)
 
         self.map_widget.add_right_click_menu_command(label="отправить дрон сюда",
                                                 command=self.add_marker_event,
@@ -232,8 +243,9 @@ class MainWindow(ctk.CTkFrame):
 
         marker = self.list_drone_positions[self.current_drone]
         marker.set_position(position.get("latitude"), position.get("longitude"))
+        self.update_path_marker()
 
-        self.after(500, self.update_dron_position)
+        self.after(100, self.update_dron_position)
 
     def new_view(self):
         image = ctk.CTkImage(
@@ -324,7 +336,8 @@ class MainWindow(ctk.CTkFrame):
                  "E - поворот направо \n"
                  "Shift - спуск дрона \n"
                  "Space - подьем дрона \n"
-                 "Ctrl + Space - старт дрона"
+                 "Ctrl + Space - запуск дрона \n"
+                 "Ctrl + Shift - посадка дрона"
         )
         self.inform.place(x=5, y=5)
 
