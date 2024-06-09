@@ -1,4 +1,5 @@
 import threading
+import time
 import tkinter as tk
 
 import customtkinter as ctk
@@ -17,7 +18,7 @@ class MainWindow(ctk.CTkFrame):
         self.obj = drone_control.Drone(host="localhost", port="5762")
 
         if not self.obj.connection_status:
-            result = win32api.MessageBox(0, 'Подключение к дрону не удалось.\n', 'Error', 5)
+            result = win32api.MessageBox(0, 'Подключение к дрону не удалось.\n', 'SkyGrid - Error', 5)
             if result == 4:
                 self.create_connect_drone()
         else:
@@ -55,7 +56,7 @@ class MainWindow(ctk.CTkFrame):
 
         label = ctk.CTkLabel(
             master=self,
-            text="НАЗВАНИЕ",
+            text="SkyGrid",
             text_color="black",
             font=("Montserrat", 20, "bold"),
         )
@@ -163,8 +164,7 @@ class MainWindow(ctk.CTkFrame):
             image=my_image,
             fg_color="transparent",
             hover=False,
-            text="",
-            command=self.new_view
+            text=""
         )
         self.image_button.grid(column=0, row=0, padx=(0, 5), sticky=tk.S)
 
@@ -198,13 +198,18 @@ class MainWindow(ctk.CTkFrame):
     list_drone_positions = list()
 
     def create_path_marker(self, coords):
-        self.go_to_position = self.map_widget.set_marker(coords[0], coords[1], text="точка назначения")
-        self.map_widget.delete_all_path()
-        self.map_widget.set_path([self.list_drone_positions[self.current_drone].position, self.go_to_position.position])
+        try:
+            self.go_to_position = self.map_widget.set_marker(coords[0], coords[1], text="точка назначения")
+            self.map_widget.delete_all_path()
+            self.map_widget.set_path([self.list_drone_positions[self.current_drone].position, self.go_to_position.position])
+        except: pass
 
     def update_path_marker(self):
-        self.map_widget.delete_all_path()
-        self.map_widget.set_path([self.list_drone_positions[self.current_drone].position, self.go_to_position.position])
+        try:
+            self.map_widget.delete_all_path()
+            self.map_widget.set_path([self.list_drone_positions[self.current_drone].position, self.go_to_position.position])
+        except:
+            pass
 
     def create_drone_marker(self, name: str, coords: list):
         position = self.map_widget.set_marker(coords[0], coords[1], text=name)
@@ -232,6 +237,7 @@ class MainWindow(ctk.CTkFrame):
             self.create_drone_marker(name="дрон 1", coords=[position.get("latitude"), position.get("longitude")])
             self.map_widget.set_position(*self.list_drone_positions[self.current_drone].position)
             thread = threading.Thread(target=self.update_dron_position)
+            thread.start()
 
         self.map_widget.add_right_click_menu_command(label="отправить дрон сюда",
                                                 command=self.add_marker_event,
@@ -245,7 +251,8 @@ class MainWindow(ctk.CTkFrame):
         marker.set_position(position.get("latitude"), position.get("longitude"))
         self.update_path_marker()
 
-        self.after(100, self.update_dron_position)
+        time.sleep(0.2)
+        self.update_path_marker()
 
     def new_view(self):
         image = ctk.CTkImage(

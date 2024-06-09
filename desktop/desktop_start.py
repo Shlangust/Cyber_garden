@@ -24,7 +24,7 @@ class Window(ctk.CTk):
 
         self.geometry(f'{self.windows_size[0]}x{self.windows_size[1]}+{x}+{y}')
         self.minsize(600, 300)
-        self.title('Название')
+        self.title('SkyGrid')
         self.configure(fg_color="#F2F2F2")
 
         self.start()
