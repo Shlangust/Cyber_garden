@@ -28,16 +28,14 @@ class MainWindow(ctk.CTkFrame):
 
     def __init__(self, host: str, port: str, base, master, **kwargs):
         super().__init__(master, **kwargs)
-
         self.base = base
         self.drone_list = list()
         self.current_drone = 0
 
         with open("../Data/drone.json", "r", encoding="utf-8") as file:
             data = json.load(file)
-            for obj in data:
-                thread = threading.Thread(target=lambda: self.create_connect_drone(obj["host"], obj["port"]))
-                thread.start()
+            for obj in data['drones']:
+                self.create_connect_drone(obj["host"], obj["port"])
 
         self.start()
 
@@ -245,11 +243,9 @@ class MainWindow(ctk.CTkFrame):
         self.map_widget = TkinterMapView(self, corner_radius=10)
         self.map_widget.grid(row=1, column=1, columnspan=2, rowspan=2, sticky=tk.NSEW, padx=0, pady=0)
         self.map_widget.set_tile_server("https://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}&s=Ga", max_zoom=22)
-
         if len(self.drone_list) != 0:
             drone = self.drone_list[self.current_drone]
             position = drone.get_geo()
-
             self.create_drone_marker(name="дрон 1", coords=[position.get("latitude"), position.get("longitude")])
             self.map_widget.set_position(*self.list_drone_positions[self.current_drone].position)
             thread = threading.Thread(target=self.update_dron_position)
