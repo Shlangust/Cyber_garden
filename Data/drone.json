@@ -8,12 +8,12 @@
     {
       "name": "дрон 2",
       "host": "localhost",
-      "port": "5762"
+      "port": "5772"
     },
     {
       "name": "дрон 3",
       "host": "localhost",
-      "port": "5762"
+      "port": "5782"
     }
   ]
 }

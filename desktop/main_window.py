@@ -35,8 +35,9 @@ class MainWindow(ctk.CTkFrame):
 
         with open("../Data/drone.json", "r", encoding="utf-8") as file:
             data = json.load(file)
-            thread = threading.Thread(target=lambda: self.create_connect_drone(data["host"], data["port"]))
-            thread.start()
+            for obj in data:
+                thread = threading.Thread(target=lambda: self.create_connect_drone(obj["host"], obj["port"]))
+                thread.start()
 
         self.start()
 

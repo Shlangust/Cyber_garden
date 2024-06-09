@@ -27,17 +27,12 @@ class frame(ctk.CTkFrame):
         button.grid(row=0, column=0, padx=5, pady=5)
 
     def show(self, host, port):
-        print(host, port)
         self.base.open_main_menu(host, port)
 
 
 class ScrollView(ctk.CTkScrollableFrame):
     def __init__(self, master, base, **kwargs):
         super().__init__(master, **kwargs)
-
-        # self.label = ctk.CTkLabel(self)
-        # self.label.grid(row=0, column=0, padx=20)
-
         with open("../Data/drone.json", "r", encoding="utf-8") as file:
             data = json.load(file)
 
